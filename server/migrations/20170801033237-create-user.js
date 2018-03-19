@@ -8,25 +8,26 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
-      },
       email: {
         type: Sequelize.STRING,
-        allowNull: false,
         unique: true
       },
-      isAdmin: {
+      instagram: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      facebook: {
+        type: Sequelize.STRING,
+        unique: true
+      },
+      business_name: {
         type: Sequelize.STRING
       },
-      password: {
-        type: Sequelize.STRING
-      },
-      createdAt: {
+      created_at: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updatedAt: {
+      updated_at: {
         allowNull: false,
         type: Sequelize.DATE
       }
