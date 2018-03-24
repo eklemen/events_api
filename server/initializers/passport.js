@@ -4,6 +4,7 @@ const passport = require('passport');
 const jwt = require('jwt-simple');
 const LocalStrategy = require('passport-local').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
+const InstagramStrategy = require('passport-instagram').Strategy;
 
 const User = require('../models').User;
 
@@ -30,6 +31,27 @@ passport.use(new LocalStrategy({
     .catch(done);
 }));
 */
+passport.use(new InstagramStrategy({
+    clientID: process.env.INSTAGRAM_CLIENT_ID,
+    clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+    callbackURL: "http://127.0.0.1:8000/auth/instagram/callback"
+  },
+  (accessToken, refreshToken, profile, done) => {
+    console.log('PROFILE IN PASSPORT', profile);
+    console.log('accessToken', accessToken);
+    console.log('refreshToken', refreshToken);
+    User.findOrCreate({
+        where: {
+          instagram: profile.username
+        },
+        defaults: {
+          instagram: profile.username,
+        }
+      }, (err, user) => (
+      done(err, user))
+    );
+  }
+));
 
 
 passport.use(new LocalStrategy({

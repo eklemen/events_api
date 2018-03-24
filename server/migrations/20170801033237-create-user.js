@@ -12,16 +12,28 @@ module.exports = {
         type: Sequelize.STRING,
         unique: true
       },
-      instagram: {
+      ig_username: {
         type: Sequelize.STRING,
         unique: true
       },
-      facebook: {
+      ig_id: {
+        type: Sequelize.STRING,
+      },
+      fb_username: {
         type: Sequelize.STRING,
         unique: true
+      },
+      fb_id: {
+        type: Sequelize.STRING,
+      },
+      token: {
+        type: Sequelize.STRING,
       },
       business_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+      },
+      provider: {
+        type: Sequelize.STRING,
       },
       created_at: {
         allowNull: false,

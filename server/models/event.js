@@ -13,15 +13,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     venue: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     event_date: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     title: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
   }, {underscored: true});
   Event.associate = models => {

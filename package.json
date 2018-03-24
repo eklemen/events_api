@@ -21,6 +21,7 @@
     "nodemon": "^1.11.0",
     "passport": "^0.3.2",
     "passport-http-bearer": "^1.0.1",
+    "passport-instagram": "^1.0.0",
     "passport-local": "^1.0.0",
     "pg": "^7.0.2",
     "pg-hstore": "^2.3.2",
