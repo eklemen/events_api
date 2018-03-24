@@ -34,22 +34,24 @@ passport.use(new LocalStrategy({
 passport.use(new InstagramStrategy({
     clientID: process.env.INSTAGRAM_CLIENT_ID,
     clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-    callbackURL: "http://127.0.0.1:8000/auth/instagram/callback"
+    callbackURL: `${process.env.BASE_URL}/auth/instagram/callback`
   },
   (accessToken, refreshToken, profile, done) => {
-    console.log('PROFILE IN PASSPORT', profile);
-    console.log('accessToken', accessToken);
-    console.log('refreshToken', refreshToken);
-    User.findOrCreate({
+    return User.findOrCreate({
         where: {
-          instagram: profile.username
+          ig_username: profile.username,
+          ig_id: profile.id
         },
         defaults: {
-          instagram: profile.username,
+          ig_username: profile.username,
+          ig_id: profile.id,
+          token: accessToken,
+          business_name: profile.displayName,
+          provider: profile.provider,
         }
-      }, (err, user) => (
-      done(err, user))
-    );
+      })
+        .spread(user => done(null, user))
+        .catch(error => done(error));
   }
 ));
 
