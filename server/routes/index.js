@@ -19,11 +19,6 @@ module.exports = (app) => {
 
   app.get('/auth/instagram', passport.authenticate('instagram'));
 
-// GET /auth/instagram/callback
-//   Use passport.authenticate() as route middleware to authenticate the
-//   request.  If authentication fails, the user will be redirected back to the
-//   login page.  Otherwise, the primary route function function will be called,
-//   which, in this example, will redirect the user to the home page.
   app.get('/auth/instagram/callback',
     passport.authenticate('instagram'),
     function(req, res) {
@@ -33,16 +28,18 @@ module.exports = (app) => {
           fb_username, fb_id, token,
           business_name, provider
         } = req.user;
-        return res.status(200).send({user: {
-          email,
-          igUsername: ig_username,
-          igId: ig_id,
-          fbUsername: fb_username,
-          fbId: fb_id,
-          token,
-          businessName: business_name,
-          provider,
-        }})
+        return res.status(200).send({
+          user: {
+            email,
+            igUsername: ig_username,
+            igId: ig_id,
+            fbUsername: fb_username,
+            fbId: fb_id,
+            token,
+            businessName: business_name,
+            provider,
+          }
+        })
       }
       return res.status(500).send({error: 'Internal server error.'})
     });

@@ -11,15 +11,6 @@ const {
 
 
 module.exports = {
-  /*
-  login:
-  passport.authenticate('local', {session: false}),
-  function(req, res) {
-    console.log("im in login");
-    res.send({message: 'hello'});
-    //res.redirect('/users/' + req.user.username);
-  },
-  */
 
   login: compose([
     passport.authenticate('local'),
