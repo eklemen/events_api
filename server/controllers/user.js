@@ -9,6 +9,9 @@ const {
   TOKEN_EXPIRATION_TIME,
 } = require('../config/config.js');
 
+// const userAttrs = {
+//   email
+// };
 
 module.exports = {
 
@@ -40,4 +43,22 @@ module.exports = {
       .then(users => res.status(200).send(users))
       .catch(error => res.status(400).send(error));
   },
+  getOne(req, res) {
+    return User
+    // should getOne exclude deleted items by default?
+      .findOne({
+        where: {ig_id: req.user.dataValues.ig_id},
+        // attributes: eventAttrs,
+      })
+      .then(event => {
+        if(!event) {
+          return res.status(404).send({
+            message: 'ERROR: Event with this uuid does not exist.',
+            status: 404
+          })
+        }
+        return res.status(200).send(event)
+      })
+      .catch(error => res.status(500).send(error));
+  }
 };

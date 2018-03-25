@@ -6,18 +6,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: DataTypes.UUIDV4
     },
-    is_deleted: {
+    isDeleted: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+      field: 'is_deleted'
     },
     venue: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    event_date: {
+    eventDate: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: 'event_date',
     },
     title: {
       type: DataTypes.STRING,

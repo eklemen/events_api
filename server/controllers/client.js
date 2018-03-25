@@ -5,8 +5,8 @@ module.exports = {
     const {body: {firstName, lastName, company, phone}} = req;
     return Client
       .create({
-        first_name: firstName,
-        last_name: lastName,
+        firstName: firstName,
+        lastName: lastName,
         company: company,
         phone: phone,
         todoId: req.params.todoId,

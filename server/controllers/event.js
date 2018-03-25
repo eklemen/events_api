@@ -3,38 +3,39 @@ const db = require('../models');
 const Op = Sequelize.Op;
 const Event = require('../models').Event;
 const Client = require('../models').Client;
-const eventAttrs = ['uuid', 'venue', 'event_date', 'title'];
-const clientAttrs = ['uuid', 'first_name', 'last_name', 'company', 'phone'];
+const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
+const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 module.exports = {
   create(req, res) {
     const {body:{client={}}} = req;
+    const {firstName, lastName, company, phone} = client;
     return db.sequelize.transaction(t => {
       return Client.findOrCreate({
         where: {
           [Op.or]: [
             {
-              first_name: client.firstName,
-              last_name: client.lastName
+              firstName,
+              lastName,
             },
-            {company: client.company},
-            {phone: client.phone}
+            {company},
+            {phone}
           ]
         },
         transaction: t,
         defaults: {
-          first_name: client.firstName,
-          last_name: client.lastName,
-          company: client.company,
-          phone: client.phone,
+          firstName,
+          lastName,
+          company,
+          phone,
         }
       })
         .spread(client => {
           const {venue, eventDate, title} = req.body;
           return Event
             .create({
-              venue: venue,
-              event_date: eventDate,
-              title: title,
+              venue,
+              eventDate,
+              title,
               client_id: client.dataValues.id,
             }, {transaction: t});
         })
@@ -62,7 +63,7 @@ module.exports = {
     return Event
       .findAll({
         where: {
-          is_deleted: false
+          isDeleted: false
         },
         attributes: eventAttrs,
         include: [
@@ -123,12 +124,12 @@ module.exports = {
         return event
           .update({
             venue: req.body.venue || event.venue,
-            event_date: req.body.eventDate || event.event_date,
+            eventDate: req.body.eventDate || event.eventDate,
             title: req.body.title || event.title,
           })
           .then(event => {
-            const {uuid, venue, event_date, title, client} = event;
-            return res.status(200).send({uuid, venue, event_date, title, client})
+            const {uuid, venue, eventDate, title, client} = event;
+            return res.status(200).send({uuid, venue, eventDate, title, client})
           })
           .catch((error) => res.status(400).send(error));
       })

@@ -7,9 +7,9 @@ module.exports = (app) => {
     message: 'Welcome to the User API!',
   }));
 
-  app.post('/api/user', userController.create);
-  app.get('/api/user', userController.list);
-  app.post('/api/user/login', userController.login);
+  // app.post('/api/user', userController.create);
+  app.get('/api/users', userController.list);
+  // app.post('/api/user/login', userController.login);
 
   app.post('/api/events', eventsController.create);
   app.get('/api/events', eventsController.list);
