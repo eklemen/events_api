@@ -9,7 +9,7 @@ module.exports = (app) => {
 
   // app.post('/api/user', userController.create);
   app.get('/api/users', userController.list);
-  // app.post('/api/user/login', userController.login);
+  app.post('/api/user/login', userController.login);
 
   app.post('/api/events', eventsController.create);
   app.get('/api/events', eventsController.list);
@@ -24,16 +24,17 @@ module.exports = (app) => {
     function(req, res) {
       if(req.user && req.user.dataValues) {
         const {
-          email, ig_username, ig_id,
-          fb_username, fb_id, token,
+          email, igUsername, igId,
+          fbUsername, fb_id, token,
           business_name, provider
-        } = req.user;
+        } = req.user.dataValues;
+        console.log('REQ USER', req.user);
         return res.status(200).send({
           user: {
             email,
-            igUsername: ig_username,
-            igId: ig_id,
-            fbUsername: fb_username,
+            igUsername,
+            igId,
+            fbUsername,
             fbId: fb_id,
             token,
             businessName: business_name,

@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-      field: 'is_deleted'
+      field: 'is_deleted',
     },
     firstName: {
       type: DataTypes.STRING,
-      field: 'first_name'
+      field: 'first_name',
     },
     lastName: {
       type: DataTypes.STRING,
-      field: 'last_name'
+      field: 'last_name',
     },
     company: DataTypes.STRING,
     phone: DataTypes.STRING,

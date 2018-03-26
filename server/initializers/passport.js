@@ -39,14 +39,14 @@ passport.use(new InstagramStrategy({
   (accessToken, refreshToken, profile, done) => {
     return User.findOrCreate({
         where: {
-          ig_username: profile.username,
-          ig_id: profile.id
+          igUsername: profile.username,
+          igId: profile.id
         },
         defaults: {
-          ig_username: profile.username,
-          ig_id: profile.id,
+          igUsername: profile.username,
+          igId: profile.id,
           token: accessToken,
-          business_name: profile.displayName,
+          businessName: profile.displayName,
           provider: profile.provider,
         }
       })

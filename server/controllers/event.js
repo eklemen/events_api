@@ -3,61 +3,98 @@ const db = require('../models');
 const Op = Sequelize.Op;
 const Event = require('../models').Event;
 const Client = require('../models').Client;
+const User = require('../models').User;
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 module.exports = {
   create(req, res) {
     const {body:{client={}}} = req;
-    const {firstName, lastName, company, phone} = client;
-    return db.sequelize.transaction(t => {
-      return Client.findOrCreate({
+    const {firstName, lastName, company, phone, igUsername} = client;
+    return User
+      .findOne({
         where: {
           [Op.or]: [
-            {
-              firstName,
-              lastName,
-            },
-            {company},
-            {phone}
+            // {
+            //   firstName,
+            //   lastName,
+            // },
+            // {phone},
+            {igUsername}
           ]
         },
-        transaction: t,
-        defaults: {
-          firstName,
-          lastName,
-          company,
-          phone,
-        }
       })
-        .spread(client => {
+      .then(user => {
+        console.log('USER before transaction------------> ', user);
+        if(user) {
           const {venue, eventDate, title} = req.body;
+          console.log('USER------------> ', user);
           return Event
             .create({
               venue,
               eventDate,
               title,
-              client_id: client.dataValues.id,
+              client_id: user.id,
             }, {transaction: t});
-        })
-        .catch(error => res.status(500).send(error))
-    })
-      .then(e => {
-        return Event.findById(e.id, {
-          attributes: eventAttrs,
-          include: [
-            {
-              model: Client,
-              as: 'client',
-              attributes: clientAttrs
+        }
+        return db.sequelize.transaction(t => {
+          return Client.findOrCreate({
+            where: {
+              [Op.or]: [
+                {
+                  firstName,
+                  lastName,
+                },
+                {company},
+                {phone}
+              ]
+            },
+            transaction: t,
+            defaults: {
+              firstName,
+              lastName,
+              company,
+              phone,
             }
-          ]
+          })
+            .spread(client => {
+              const {venue, eventDate, title} = req.body;
+              return Event
+                .create({
+                  venue,
+                  eventDate,
+                  title,
+                  unregistered_client_id: client.dataValues.id || 1,
+                }, {transaction: t});
+            })
+            .catch(error => res.status(500).send(error))
+          // if(user) {
+          //
+          // }
         })
-          .then(event => res.status(200).send(event))
-          .catch(error => res.status(404).send(error))
+          .then(e => {
+            return Event.findById(e.id, {
+              attributes: eventAttrs,
+              include: [
+                {
+                  model: Client,
+                  as: 'unregisteredClient',
+                  attributes: clientAttrs
+                },
+                {
+                  model: User,
+                  as: 'client',
+                  // attributes: clientAttrs
+                }
+              ]
+            })
+              .then(event => res.status(200).send(event))
+              .catch(error => res.status(404).send(error))
+          })
+          .catch(error => res.status(500).send({
+            error: 'There was an error with the event creation transaction. Ensure the client info or event keys are properly formatted.'
+          }));
       })
-      .catch(error => res.status(500).send({
-        error: 'There was an error with the event creation transaction. Ensure the client info or event keys are properly formatted.'
-      }));
+      .catch(error => res.status(400).send(error));
   },
   list(_req, res) {
     return Event
@@ -69,8 +106,13 @@ module.exports = {
         include: [
           {
             model: Client,
-            as: 'client',
+            as: 'unregisteredClient',
             attributes: clientAttrs
+          },
+          {
+            model: User,
+            as: 'client',
+            // attributes: clientAttrs
           }
         ]
       })

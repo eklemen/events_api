@@ -40,6 +40,13 @@ module.exports = {
           key: 'id',
         },
       },
+      unregistered_client_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Clients',
+          key: 'id',
+        },
+      },
     });
   },
   down: (queryInterface, Sequelize) => {
