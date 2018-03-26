@@ -19,6 +19,12 @@ module.exports = {
       ig_id: {
         type: Sequelize.STRING,
       },
+      ig_profile_pic: {
+        type: Sequelize.STRING,
+      },
+      ig_full_name: {
+        type: Sequelize.STRING,
+      },
       fb_username: {
         type: Sequelize.STRING,
         unique: true
@@ -35,6 +41,9 @@ module.exports = {
       provider: {
         type: Sequelize.STRING,
       },
+      is_vendor: {
+        type: Sequelize.BOOLEAN,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE
@@ -42,7 +51,7 @@ module.exports = {
       updated_at: {
         allowNull: false,
         type: Sequelize.DATE
-      }
+      },
     });
   },
   down: function(queryInterface, Sequelize) {
