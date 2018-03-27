@@ -24,16 +24,15 @@ module.exports = {
         },
       })
       .then(user => {
-        console.log('USER before transaction------------> ', user);
         if(user) {
           const {venue, eventDate, title} = req.body;
-          console.log('USER------------> ', user);
+          console.log('USER------------> ', user.dataValues);
           return Event
             .create({
               venue,
               eventDate,
               title,
-              client_id: user.id,
+              client_id: user.dataValues.id,
             }, {transaction: t});
         }
         return db.sequelize.transaction(t => {
@@ -75,11 +74,11 @@ module.exports = {
             return Event.findById(e.id, {
               attributes: eventAttrs,
               include: [
-                {
-                  model: Client,
-                  as: 'unregisteredClient',
-                  attributes: clientAttrs
-                },
+                // {
+                //   model: Client,
+                //   as: 'unregisteredClient',
+                //   attributes: clientAttrs
+                // },
                 {
                   model: User,
                   as: 'client',
