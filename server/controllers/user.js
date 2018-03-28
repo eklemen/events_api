@@ -26,6 +26,57 @@ module.exports = {
       res.status(200).send({ token });
     },
   ]),
+  igLogin(accessToken, refreshToken, profile, done) {
+    return User.findOne({
+      where: {
+        igUsername: profile.username,
+        igId: profile.id
+      }
+    })
+      .then(user => {
+        if(!user) {
+          return User.create({
+            igUsername: profile.username,
+            igId: profile.id,
+            igToken: accessToken,
+            businessName: profile.displayName,
+            igFullName: profile.displayName,
+            provider: profile.provider,
+            profilePicture: profile._json.data.profile_picture,
+          })
+            .then(newUser => done(null, {user: newUser, newUser: true}))
+            .catch(error => done(error));
+        }
+        return user.update({
+          provider: profile.provider || user.provider,
+          igToken: accessToken
+        })
+          .then(existingUser => done(null, {user: existingUser, newUser: false}))
+          .catch(error => done(error));
+      })
+      .catch(error => done(error));
+  },
+  igLoginCallback(req, res) {
+    if(req.user){
+      const {
+        uuid, igUsername, igId, igToken,
+        igFullName, provider, profilePicture,
+      } = req.user.user;
+      return res.status(200).send({
+        user: {
+          uuid,
+          igUsername,
+          igId,
+          igToken,
+          igFullName,
+          provider,
+          profilePicture,
+        },
+        newUser: req.user.newUser
+      });
+    }
+    return res.status(500).send({error: 'Internal server error.'})
+  },
 
 
   create(req, res) {

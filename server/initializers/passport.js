@@ -6,6 +6,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
 const InstagramStrategy = require('passport-instagram').Strategy;
 
+const userController = require('../controllers').user;
 const User = require('../models').User;
 
 const { JWT_TOKEN } = require('../config/config');
@@ -20,37 +21,7 @@ passport.use(new InstagramStrategy({
     clientID: process.env.INSTAGRAM_CLIENT_ID,
     clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
     callbackURL: `${process.env.BASE_URL}/auth/instagram/callback`
-  },
-  (accessToken, refreshToken, profile, done) => {
-    return User.findOne({
-      where: {
-        igUsername: profile.username,
-        igId: profile.id
-      }
-    })
-      .then(user => {
-        if(!user) {
-          return User.create({
-            igUsername: profile.username,
-            igId: profile.id,
-            igToken: accessToken,
-            businessName: profile.displayName,
-            igFullName: profile.displayName,
-            provider: profile.provider,
-            profilePicture: profile._json.data.profile_picture,
-          })
-            .then(newUser => done(null, {user: newUser, newUser: true}))
-            .catch(error => done(error));
-        }
-        return user.update({
-          provider: profile.provider || user.provider,
-          igToken: accessToken
-        })
-          .then(existingUser => done(null, {user: existingUser, newUser: false}))
-          .catch(error => done(error));
-      })
-      .catch(error => done(error));
-  }
+  }, userController.igLogin
 ));
 
 

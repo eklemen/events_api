@@ -7,9 +7,10 @@ module.exports = (app) => {
     message: 'Welcome to the User API!',
   }));
 
-  // app.post('/api/user', userController.create);
-  app.get('/api/users', userController.list);
-  app.post('/api/user/login', userController.login);
+  // Instagram Auth
+  app.get('/auth/instagram', passport.authenticate('instagram'));
+  app.get('/auth/instagram/callback',
+    passport.authenticate('instagram'),userController.igLoginCallback);
 
   app.post('/api/events', eventsController.create);
   app.get('/api/events', eventsController.list);
@@ -17,29 +18,4 @@ module.exports = (app) => {
   app.put('/api/events/:uuid', eventsController.update);
   app.delete('/api/events/:uuid', eventsController.softDelete);
 
-  app.get('/auth/instagram', passport.authenticate('instagram'));
-
-  app.get('/auth/instagram/callback',
-    passport.authenticate('instagram'),
-    function(req, res) {
-      if(req.user){
-        const {
-          uuid, igUsername, igId, igToken,
-          igFullName, provider, profilePicture,
-        } = req.user.user;
-        return res.status(200).send({
-          user: {
-            uuid,
-            igUsername,
-            igId,
-            igToken,
-            igFullName,
-            provider,
-            profilePicture,
-          },
-          newUser: req.user.newUser
-        });
-      }
-      return res.status(500).send({error: 'Internal server error.'})
-    });
 };
