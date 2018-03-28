@@ -22,25 +22,23 @@ module.exports = (app) => {
   app.get('/auth/instagram/callback',
     passport.authenticate('instagram'),
     function(req, res) {
-      if(req.user && req.user.dataValues) {
+      if(req.user){
         const {
-          email, igUsername, igId,
-          fbUsername, fb_id, token,
-          business_name, provider
-        } = req.user.dataValues;
-        console.log('REQ USER', req.user);
+          uuid, igUsername, igId, igToken,
+          igFullName, provider, profilePicture,
+        } = req.user.user;
         return res.status(200).send({
           user: {
-            email,
+            uuid,
             igUsername,
             igId,
-            fbUsername,
-            fbId: fb_id,
-            token,
-            businessName: business_name,
+            igToken,
+            igFullName,
             provider,
-          }
-        })
+            profilePicture,
+          },
+          newUser: req.user.newUser
+        });
       }
       return res.status(500).send({error: 'Internal server error.'})
     });

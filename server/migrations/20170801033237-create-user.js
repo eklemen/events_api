@@ -8,21 +8,31 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      uuid: {
+        allowNull: false,
+        type: Sequelize.UUID,
+      },
       email: {
         type: Sequelize.STRING,
         unique: true
+      },
+      phone: {
+        type: Sequelize.STRING,
+      },
+      ig_id: {
+        type: Sequelize.STRING,
       },
       ig_username: {
         type: Sequelize.STRING,
         unique: true
       },
-      ig_id: {
-        type: Sequelize.STRING,
-      },
-      ig_profile_pic: {
-        type: Sequelize.STRING,
-      },
       ig_full_name: {
+        type: Sequelize.STRING,
+      },
+      ig_token: {
+        type: Sequelize.STRING,
+      },
+      profile_picture: {
         type: Sequelize.STRING,
       },
       fb_username: {
@@ -32,7 +42,7 @@ module.exports = {
       fb_id: {
         type: Sequelize.STRING,
       },
-      token: {
+      fb_token: {
         type: Sequelize.STRING,
       },
       business_name: {
@@ -41,7 +51,7 @@ module.exports = {
       provider: {
         type: Sequelize.STRING,
       },
-      is_vendor: {
+      is_deleted: {
         type: Sequelize.BOOLEAN,
       },
       created_at: {

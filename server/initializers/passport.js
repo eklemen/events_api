@@ -9,49 +9,47 @@ const InstagramStrategy = require('passport-instagram').Strategy;
 const User = require('../models').User;
 
 const { JWT_TOKEN } = require('../config/config');
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
 
-/*
-passport.use(new LocalStrategy({
-  session: false,
-  usernameField: 'email',
-  passwordField: 'password',
- }, (email, password, done) => {
-  User.find({ where: { email } })
-    .then((user) => {
-      if (!user) { return done(null, false); }
-      console.log("USER FOUND NAME!", user.name)
-      console.log("User is password: ", user.isValidPassword('123456'));
-      return user;
-    //return Promise.all([user, user.isValidPassword(password)]);
-    })
-    .then(([user, isValid]) => {
-      if (!isValid) { return done(null, false); }
-      return done(null, user);
-    })
-    .catch(done);
-}));
-*/
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 passport.use(new InstagramStrategy({
     clientID: process.env.INSTAGRAM_CLIENT_ID,
     clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
     callbackURL: `${process.env.BASE_URL}/auth/instagram/callback`
   },
   (accessToken, refreshToken, profile, done) => {
-    return User.findOrCreate({
-        where: {
-          igUsername: profile.username,
-          igId: profile.id
-        },
-        defaults: {
-          igUsername: profile.username,
-          igId: profile.id,
-          token: accessToken,
-          businessName: profile.displayName,
-          provider: profile.provider,
+    return User.findOne({
+      where: {
+        igUsername: profile.username,
+        igId: profile.id
+      }
+    })
+      .then(user => {
+        if(!user) {
+          return User.create({
+            igUsername: profile.username,
+            igId: profile.id,
+            igToken: accessToken,
+            businessName: profile.displayName,
+            igFullName: profile.displayName,
+            provider: profile.provider,
+            profilePicture: profile._json.data.profile_picture,
+          })
+            .then(newUser => done(null, {user: newUser, newUser: true}))
+            .catch(error => done(error));
         }
+        return user.update({
+          provider: profile.provider || user.provider,
+          igToken: accessToken
+        })
+          .then(existingUser => done(null, {user: existingUser, newUser: false}))
+          .catch(error => done(error));
       })
-        .spread(user => done(null, user))
-        .catch(error => done(error));
+      .catch(error => done(error));
   }
 ));
 
