@@ -42,7 +42,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       field: 'fb_token',
     },
-    business_name: {type: DataTypes.STRING},
+    businessName: {
+      type: DataTypes.STRING,
+      field: 'business_name',
+    },
     provider: {type: DataTypes.STRING},
     isDeleted: {
       type: DataTypes.BOOLEAN,

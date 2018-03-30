@@ -12,6 +12,12 @@ module.exports = (app) => {
   app.get('/auth/instagram/callback',
     passport.authenticate('instagram'),userController.igLoginCallback);
 
+  app.get('/auth/logout', userController.logout);
+  // Users
+  app.get('/api/users', userController.list);
+  app.get('/api/users/self', userController.self);
+  app.get('/api/users/:uuid', userController.getOne);
+
   app.post('/api/events', eventsController.create);
   app.get('/api/events', eventsController.list);
   app.get('/api/events/:uuid', eventsController.getOne);

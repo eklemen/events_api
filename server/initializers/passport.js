@@ -57,12 +57,12 @@ passport.use(new BearerStrategy({ session: false }, (token, done) => {
   return done(null, false);
 }));
 
-passport.serializeUser((user, done) => done(null, user.id));
-
-passport.deserializeUser((id, done) => {
-  User.findById(id)
-    .then(user => done(null, user))
-    .catch(done);
-});
+// passport.serializeUser((user, done) => done(null, user.id));
+//
+// passport.deserializeUser((id, done) => {
+//   User.findById(id)
+//     .then(user => done(null, user))
+//     .catch(done);
+// });
 
 module.exports = { JWT_TOKEN };

@@ -62,22 +62,29 @@ module.exports = {
         uuid, igUsername, igId, igToken,
         igFullName, provider, profilePicture,
       } = req.user.user;
-      return res.status(200).send({
-        user: {
-          uuid,
-          igUsername,
-          igId,
-          igToken,
-          igFullName,
-          provider,
-          profilePicture,
-        },
-        newUser: req.user.newUser
+      console.log('++++++++++++++', req.isAuthenticated());
+      return res.status(200)
+        .cookie('token', igToken)
+        .send({
+          user: {
+            uuid,
+            igUsername,
+            igId,
+            igToken,
+            igFullName,
+            provider,
+            profilePicture,
+          },
+          newUser: req.user.newUser
       });
     }
     return res.status(500).send({error: 'Internal server error.'})
   },
 
+  logout(req, res) {
+    req.logout();
+    res.status(200).send({ success: true })
+  },
 
   create(req, res) {
     const { name, email, password, isAdmin } = req.body;
@@ -89,8 +96,19 @@ module.exports = {
       .catch(error => res.status(400).send(error));
   },
   list(req, res) {
+
     return User
-      .all()
+      .findAll({
+        where: {isDeleted: false},
+        attributes: [
+          'uuid',
+          'email',
+          'igUsername',
+          'igFullName',
+          'profilePicture',
+          'businessName',
+        ]
+      })
       .then(users => res.status(200).send(users))
       .catch(error => res.status(400).send(error));
   },
@@ -98,18 +116,41 @@ module.exports = {
     return User
     // should getOne exclude deleted items by default?
       .findOne({
-        where: {ig_id: req.user.dataValues.ig_id},
-        // attributes: eventAttrs,
+        where: {uuid: req.params.uuid},
+        attributes: [
+          'uuid',
+          'email',
+          'igUsername',
+          'igFullName',
+          'profilePicture',
+          'businessName',
+        ]
       })
-      .then(event => {
-        if(!event) {
+      .then(user => {
+        if(!user) {
           return res.status(404).send({
-            message: 'ERROR: Event with this uuid does not exist.',
+            message: 'ERROR: User not found.',
             status: 404
           })
         }
-        return res.status(200).send(event)
+        return res.status(200).send(user)
       })
       .catch(error => res.status(500).send(error));
+  },
+  self(req, res) {
+    return User
+      .findOne({
+        where: {igToken: req.cookies.token},
+        attributes: [
+          'uuid',
+          'email',
+          'igUsername',
+          'igFullName',
+          'profilePicture',
+          'businessName',
+        ]
+      })
+      .then(users => res.status(200).send(users))
+      .catch(error => res.status(400).send(error));
   }
 };

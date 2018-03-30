@@ -33,20 +33,6 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE
       },
-      client_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id',
-        },
-      },
-      unregistered_client_id: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Clients',
-          key: 'id',
-        },
-      },
     });
   },
   down: (queryInterface, Sequelize) => {
