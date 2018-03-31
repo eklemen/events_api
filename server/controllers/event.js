@@ -80,47 +80,74 @@ module.exports = {
       .catch(error => res.status(500).send(error));
   },
   update(req, res) {
+    const {venue, eventDate, title} = req.body;
+    const updateObj = {};
+    if('venue' in req.body) updateObj.venue = venue;
+    if('eventDate' in req.body) updateObj.eventDate = eventDate;
+    if('title' in req.body) updateObj.title = title;
+    console.log('---------\n\r', updateObj);
     return Event
-      .findOne({
-        where: {uuid: req.params.uuid},
-        attributes: eventAttrs,
-        include: [
-          {
-            model: User,
-            as: 'creator',
-            attributes: userAttrs
-          }
-        ]
-      })
-      .then(event => {
-        if (!event) {
-          return res.status(404).send({
-            message: 'ERROR: Event with this uuid does not exist.',
-            status: 404,
-          });
+      .update(
+        updateObj,
+        {
+          where: {
+            uuid: req.params.uuid
+          },
+          returning: true,
+          attributes: eventAttrs,
+          include: [
+            {
+              model: User,
+              as: 'creator',
+              attributes: userAttrs
+            }
+          ]
         }
-        const {dataValues: {venue, eventDate, title}} = event;
-        const {body} = req;
-        return event
-          .update({
-            venue: body.venue         || venue,
-            eventDate: body.eventDate || eventDate,
-            title: body.title         || title,
-          })
-          .then(event => {
-            console.log('event.creator------------\n\r', event.creator);
-            const {uuid, venue, eventDate, title, creator} = event;
-            return res.status(200).send({uuid, venue, eventDate, title, creator})
-          })
-          .catch((error) => {
-            console.log('foo');
-            return res.status(400).send(error)
-          });
+      )
+      .spread((_rows, event) => {
+        console.log('event.creator------------\n\r', event[0].dataValues);
+        const {uuid, venue, eventDate, title, creator} = event[0].dataValues;
+        return res.status(200).send({uuid, venue, eventDate, title, creator})
       })
-      .catch((error) => res.status(500).send({
-        error,
-        message: 'ERROR: Internal server error.',
-      }));
+      .catch((error) => res.status(400).send(error));
+    // return Event
+    //   .findOne({
+    //     where: {uuid: req.params.uuid},
+    //     attributes: eventAttrs,
+    //     include: [
+    //       {
+    //         model: User,
+    //         as: 'creator',
+    //         attributes: userAttrs
+    //       }
+    //     ]
+    //   })
+    //   .then(event => {
+    //     if (!event) {
+    //       return res.status(404).send({
+    //         message: 'ERROR: Event with this uuid does not exist.',
+    //         status: 404,
+    //       });
+    //     }
+    //     const {dataValues: {venue, eventDate, title}} = event;
+    //     const {body} = req;
+    //     return event
+    //       .update({
+    //         venue: body.venue         || venue,
+    //         eventDate: body.eventDate || eventDate,
+    //         title: body.title         || title,
+    //       })
+    //       .spread((_rows, event) => {
+    //         console.log('event.creator------------\n\r', event.creator);
+    //         const {uuid, venue, eventDate, title, creator} = event;
+    //         return res.status(200).send({uuid, venue, eventDate, title, creator})
+    //       })
+    //       .catch((error) => res.status(400).send(error));
+    //   })
+    //   .catch((error) => res.status(500).send({
+    //     error,
+    //     message: 'ERROR: Internal server error',
+    //   }));
   },
   softDelete(req, res) {
     return Event
