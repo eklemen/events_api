@@ -15,6 +15,7 @@ const createToken = (id) => {
 
 module.exports = {
   authRoute(req, res, next) {
+    // should this function do User.findById(token)
     if(!req.cookies.token) {
       return res.status(403).send({
         success: false,
