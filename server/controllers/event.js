@@ -5,95 +5,121 @@ const Event = require('../models').Event;
 const Client = require('../models').Client;
 const User = require('../models').User;
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
+const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 module.exports = {
   create(req, res) {
-    const {body:{client={}}} = req;
+    const {body:{client={}}, cookies:{token}} = req;
     const {firstName, lastName, company, phone, igUsername} = client;
+
     return User
       .findOne({
         where: {
-          [Op.or]: [
-            // {
-            //   firstName,
-            //   lastName,
-            // },
-            // {phone},
-            {igUsername}
-          ]
+          igToken: token
         },
       })
       .then(user => {
-        if(user) {
-          const {venue, eventDate, title} = req.body;
-          console.log('USER------------> ', user.dataValues);
-          return Event
-            .create({
-              venue,
-              eventDate,
-              title,
-              client_id: user.dataValues.id,
-            }, {transaction: t});
+        if(!user) {
+          return res.status(403).send({error: 'Unauthorized. Please log in.'})
         }
-        return db.sequelize.transaction(t => {
-          return Client.findOrCreate({
-            where: {
-              [Op.or]: [
-                {
-                  firstName,
-                  lastName,
-                },
-                {company},
-                {phone}
-              ]
-            },
-            transaction: t,
-            defaults: {
-              firstName,
-              lastName,
-              company,
-              phone,
-            }
+        const {venue, eventDate, title} = req.body;
+        return Event
+          .create({
+            venue,
+            eventDate,
+            title,
+            creator_id: user.id
           })
-            .spread(client => {
-              const {venue, eventDate, title} = req.body;
-              return Event
-                .create({
-                  venue,
-                  eventDate,
-                  title,
-                  unregistered_client_id: client.dataValues.id || 1,
-                }, {transaction: t});
-            })
-            .catch(error => res.status(500).send(error))
-          // if(user) {
-          //
-          // }
-        })
           .then(e => {
             return Event.findById(e.id, {
               attributes: eventAttrs,
               include: [
-                // {
-                //   model: Client,
-                //   as: 'unregisteredClient',
-                //   attributes: clientAttrs
-                // },
                 {
                   model: User,
-                  as: 'client',
-                  // attributes: clientAttrs
+                  as: 'creator',
+                  attributes: userAttrs
                 }
               ]
             })
               .then(event => res.status(200).send(event))
-              .catch(error => res.status(404).send(error))
+              .catch(error => res.status(404).send(error));
           })
           .catch(error => res.status(500).send({
-            error: 'There was an error with the event creation transaction. Ensure the client info or event keys are properly formatted.'
+            error: 'Unable to create Event.'
           }));
       })
-      .catch(error => res.status(400).send(error));
+      .catch(error => res.status(400).send(error))
+      // .then(user => {
+      //   if(user) {
+      //     const {venue, eventDate, title} = req.body;
+      //     console.log('USER------------> ', user.dataValues);
+      //     return Event
+      //       .create({
+      //         venue,
+      //         eventDate,
+      //         title,
+      //         client_id: user.dataValues.id,
+      //       }, {transaction: t});
+      //   }
+      //   return db.sequelize.transaction(t => {
+      //     return Client.findOrCreate({
+      //       where: {
+      //         [Op.or]: [
+      //           {
+      //             firstName,
+      //             lastName,
+      //           },
+      //           {company},
+      //           {phone}
+      //         ]
+      //       },
+      //       transaction: t,
+      //       defaults: {
+      //         firstName,
+      //         lastName,
+      //         company,
+      //         phone,
+      //       }
+      //     })
+      //       .spread(client => {
+      //         const {venue, eventDate, title} = req.body;
+      //         return Event
+      //           .create({
+      //             venue,
+      //             eventDate,
+      //             title,
+      //             unregistered_client_id: client.dataValues.id || 1,
+      //           }, {transaction: t});
+      //       })
+      //       .catch(error => res.status(500).send(error))
+      //     // if(user) {
+      //     //
+      //     // }
+      //   })
+      //     .then(e => {
+      //       return Event.findById(e.id, {
+      //         attributes: eventAttrs,
+      //         include: [
+      //           // {
+      //           //   model: Client,
+      //           //   as: 'unregisteredClient',
+      //           //   attributes: clientAttrs
+      //           // },
+      //           {
+      //             model: User,
+      //             as: 'client',
+      //             // attributes: clientAttrs
+      //           }
+      //         ]
+      //       })
+      //         .then(event => res.status(200).send(event))
+      //         .catch(error => res.status(404).send(error))
+      //     })
+      //     .catch(error => res.status(500).send({
+      //       error: 'There was an error with the event creation transaction. Ensure the client info or event keys are properly formatted.'
+      //     }));
+      // })
+      // .catch(error => res.status(400).send(error));
   },
   list(_req, res) {
     return Event

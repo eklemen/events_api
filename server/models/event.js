@@ -27,13 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {underscored: true});
   Event.associate = models => {
-    Event.belongsTo(models.Client, {
-      foreignKey: 'unregistered_client_id',
-      as: 'unregistered_client'
-    });
     Event.belongsTo(models.User, {
-      foreignKey: 'client_id',
-      as: 'client'
+      foreignKey: 'creator_id',
+      as: 'creator'
     });
   };
   return Event;

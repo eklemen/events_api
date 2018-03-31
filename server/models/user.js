@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: DataTypes.UUIDV4
     },
+    token: {
+      type: DataTypes.STRING,
+    },
     email: {type: DataTypes.STRING, unique: true},
     phone: DataTypes.STRING,
     // // IG

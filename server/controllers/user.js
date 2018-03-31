@@ -1,5 +1,4 @@
 const User = require('../models').User;
-
 const jwt = require('jwt-simple');
 const passport = require('passport');
 const { compose } = require('compose-middleware');
@@ -9,9 +8,12 @@ const {
   TOKEN_EXPIRATION_TIME,
 } = require('../config/config.js');
 
-// const userAttrs = {
-//   email
-// };
+const createToken = (id) => {
+  return jwt.encode({
+    id,
+    expirationDate: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
+  }, JWT_TOKEN);
+};
 
 module.exports = {
 
@@ -35,6 +37,7 @@ module.exports = {
     })
       .then(user => {
         if(!user) {
+          // Create a user
           return User.create({
             igUsername: profile.username,
             igId: profile.id,
@@ -44,10 +47,24 @@ module.exports = {
             provider: profile.provider,
             profilePicture: profile._json.data.profile_picture,
           })
-            .then(newUser => done(null, {user: newUser, newUser: true}))
+            .then(newUser => {
+              // Update the user with a token
+              newUser.update({
+                token: createToken(newUser.dataValues.id)
+              })
+                .then(updatedUser => {
+                  done(
+                    null,
+                    {user: updatedUser, newUser: true})
+                })
+                .catch(error => done(error));
+              }
+            )
             .catch(error => done(error));
         }
+        // Update an existing user
         return user.update({
+          token: createToken(user.dataValues.id),
           provider: profile.provider || user.provider,
           igToken: accessToken
         })
@@ -59,12 +76,11 @@ module.exports = {
   igLoginCallback(req, res) {
     if(req.user){
       const {
-        uuid, igUsername, igId, igToken,
+        uuid, igUsername, igId, igToken, token,
         igFullName, provider, profilePicture,
       } = req.user.user;
-      console.log('++++++++++++++', req.isAuthenticated());
       return res.status(200)
-        .cookie('token', igToken)
+        .cookie('token', token)
         .send({
           user: {
             uuid,
@@ -150,7 +166,10 @@ module.exports = {
           'businessName',
         ]
       })
-      .then(users => res.status(200).send(users))
+      .then(user => {
+        if(!user) return res.status(404).send({error: 'Not found'});
+        return res.status(200).send(user)
+      })
       .catch(error => res.status(400).send(error));
   }
 };

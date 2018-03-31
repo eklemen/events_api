@@ -1,16 +1,20 @@
+const passport = require('passport');
 const userController = require('../controllers').user;
 const eventsController = require('../controllers').event;
-const passport = require('passport');
+const authController = require('../controllers').auth;
 
 module.exports = (app) => {
-  app.get('/api', (req, res) => res.status(200).send({
-    message: 'Welcome to the User API!',
-  }));
+
+  app.route('/api').get(authController.authRoute, (req, res) => {
+    return res.status(200).send({
+      message: 'Welcome to the User API!',
+    })
+  });
 
   // Instagram Auth
   app.get('/auth/instagram', passport.authenticate('instagram'));
   app.get('/auth/instagram/callback',
-    passport.authenticate('instagram'),userController.igLoginCallback);
+    passport.authenticate('instagram'),authController.igLoginCallback);
 
   app.get('/auth/logout', userController.logout);
   // Users
@@ -23,5 +27,5 @@ module.exports = (app) => {
   app.get('/api/events/:uuid', eventsController.getOne);
   app.put('/api/events/:uuid', eventsController.update);
   app.delete('/api/events/:uuid', eventsController.softDelete);
-
+  // https://api.instagram.com/oauth/access_token
 };

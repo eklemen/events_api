@@ -12,6 +12,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.UUID,
       },
+      token: {
+        type: Sequelize.STRING,
+      },
       email: {
         type: Sequelize.STRING,
         unique: true

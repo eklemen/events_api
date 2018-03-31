@@ -6,7 +6,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const BearerStrategy = require('passport-http-bearer').Strategy;
 const InstagramStrategy = require('passport-instagram').Strategy;
 
-const userController = require('../controllers').user;
+const authController = require('../controllers').auth;
 const User = require('../models').User;
 
 const { JWT_TOKEN } = require('../config/config');
@@ -21,7 +21,7 @@ passport.use(new InstagramStrategy({
     clientID: process.env.INSTAGRAM_CLIENT_ID,
     clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
     callbackURL: `${process.env.BASE_URL}/auth/instagram/callback`
-  }, userController.igLogin
+  }, authController.igLogin
 ));
 
 
