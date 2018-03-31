@@ -7,7 +7,7 @@ const REQUIRED_KEYS = [
   'DB_PASSWORD',
   'DB_DATABASE',
   'DB_HOST',
-  'JWT_TOKEN',
+  'JWT_SECRET',
   'TOKEN_EXPIRATION_TIME',
 ];
 
@@ -22,12 +22,12 @@ const {
   DB_PASSWORD,
   DB_DATABASE,
   DB_HOST,
-  JWT_TOKEN,
+  JWT_SECRET,
   TOKEN_EXPIRATION_TIME,
 } = process.env;
 
 module.exports = {
-  JWT_TOKEN,
+  JWT_SECRET,
   TOKEN_EXPIRATION_TIME: Number(TOKEN_EXPIRATION_TIME),
 
   // Sequelize config, sourced based on current NODE_ENV from models/index.js file
@@ -37,8 +37,5 @@ module.exports = {
     database: DB_DATABASE,
     host: DB_HOST,
     dialect: 'postgres',
-    define: {
-      underscored: true,
-    },
   },
 };

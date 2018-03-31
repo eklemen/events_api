@@ -23,8 +23,5 @@ module.exports = (sequelize, DataTypes) => {
     company: DataTypes.STRING,
     phone: DataTypes.STRING,
   }, {underscored: true});
-  Client.associate = (models) => {
-    Client.hasMany(models.Event);
-  };
   return Client;
 };

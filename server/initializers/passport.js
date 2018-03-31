@@ -9,7 +9,7 @@ const InstagramStrategy = require('passport-instagram').Strategy;
 const authController = require('../controllers').auth;
 const User = require('../models').User;
 
-const { JWT_TOKEN } = require('../config/config');
+const { JWT_SECRET } = require('../config/config');
 passport.serializeUser((user, done) => {
   done(null, user);
 });
@@ -45,7 +45,7 @@ passport.use(new LocalStrategy({
 
 
 passport.use(new BearerStrategy({ session: false }, (token, done) => {
-  const decodedToken = jwt.decode(token, JWT_TOKEN);
+  const decodedToken = jwt.decode(token, JWT_SECRET);
   const userId = decodedToken && decodedToken.id;
   const expires = decodedToken && new Date(decodedToken.expirationDate);
 
@@ -65,4 +65,4 @@ passport.use(new BearerStrategy({ session: false }, (token, done) => {
 //     .catch(done);
 // });
 
-module.exports = { JWT_TOKEN };
+module.exports = { JWT_SECRET };

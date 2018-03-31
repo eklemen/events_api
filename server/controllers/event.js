@@ -10,7 +10,6 @@ const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 module.exports = {
   create(req, res) {
     const {venue, eventDate, title} = req.body;
-    console.log('----------------\n\r', req.tokenBearer);
     return Event
       .create({
         venue,
@@ -19,7 +18,6 @@ module.exports = {
         creator_id: req.tokenBearer,
       })
       .then(e => {
-        console.log('e------------\n\r', e.dataValues);
         return Event.findById(e.dataValues.id, {
           attributes: eventAttrs,
           include: [
@@ -47,14 +45,9 @@ module.exports = {
         attributes: eventAttrs,
         include: [
           {
-            model: Client,
-            as: 'unregisteredClient',
-            attributes: clientAttrs
-          },
-          {
             model: User,
-            as: 'client',
-            // attributes: clientAttrs
+            as: 'creator',
+            attributes: userAttrs
           }
         ]
       })
@@ -69,9 +62,9 @@ module.exports = {
         attributes: eventAttrs,
         include: [
           {
-            model: Client,
-            as: 'client',
-            attributes: clientAttrs
+            model: User,
+            as: 'creator',
+            attributes: userAttrs
           }
         ]
       })
@@ -90,11 +83,12 @@ module.exports = {
     return Event
       .findOne({
         where: {uuid: req.params.uuid},
+        attributes: eventAttrs,
         include: [
           {
-            model: Client,
-            as: 'client',
-            attributes: clientAttrs
+            model: User,
+            as: 'creator',
+            attributes: userAttrs
           }
         ]
       })
@@ -102,25 +96,30 @@ module.exports = {
         if (!event) {
           return res.status(404).send({
             message: 'ERROR: Event with this uuid does not exist.',
-            status: 404
+            status: 404,
           });
         }
+        const {dataValues: {venue, eventDate, title}} = event;
+        const {body} = req;
         return event
           .update({
-            venue: req.body.venue || event.venue,
-            eventDate: req.body.eventDate || event.eventDate,
-            title: req.body.title || event.title,
+            venue: body.venue         || venue,
+            eventDate: body.eventDate || eventDate,
+            title: body.title         || title,
           })
           .then(event => {
-            const {uuid, venue, eventDate, title, client} = event;
-            return res.status(200).send({uuid, venue, eventDate, title, client})
+            console.log('event.creator------------\n\r', event.creator);
+            const {uuid, venue, eventDate, title, creator} = event;
+            return res.status(200).send({uuid, venue, eventDate, title, creator})
           })
-          .catch((error) => res.status(400).send(error));
+          .catch((error) => {
+            console.log('foo');
+            return res.status(400).send(error)
+          });
       })
       .catch((error) => res.status(500).send({
-        status: 500,
         error,
-        message: 'ERROR: Internal server error'
+        message: 'ERROR: Internal server error.',
       }));
   },
   softDelete(req, res) {
@@ -140,9 +139,8 @@ module.exports = {
           .catch((error) => res.status(500).send(error));
       })
       .catch((error) => res.status(500).send({
-        status: 500,
         error,
-        message: 'ERROR: Internal server error'
+        message: 'ERROR: Internal server error',
       }));
   }
 };

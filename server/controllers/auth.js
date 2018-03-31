@@ -2,7 +2,7 @@ const User = require('../models').User;
 const jwt = require('jwt-simple');
 
 const {
-  JWT_TOKEN,
+  JWT_SECRET,
   TOKEN_EXPIRATION_TIME,
 } = require('../config/config.js');
 
@@ -10,7 +10,7 @@ const createToken = (id) => {
   return jwt.encode({
     id,
     expirationDate: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
-  }, JWT_TOKEN);
+  }, JWT_SECRET);
 };
 
 module.exports = {
@@ -23,7 +23,7 @@ module.exports = {
       });
     }
     try {
-      const decodedToken = jwt.decode(req.cookies.token, JWT_TOKEN);
+      const decodedToken = jwt.decode(req.cookies.token, JWT_SECRET);
       const userId = decodedToken && decodedToken.id;
       if(decodedToken && userId) {
         User.findById(userId)
@@ -31,7 +31,6 @@ module.exports = {
             if(!user) {
               return res.status(403).send({error: 'Token is invalid'})
             }
-            console.log('user.dataValues.id------------\n\r', user.dataValues.id);
             req.tokenBearer = user.dataValues.id;
             next();
           })

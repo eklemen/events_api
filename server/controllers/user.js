@@ -4,7 +4,7 @@ const passport = require('passport');
 const { compose } = require('compose-middleware');
 
 const {
-  JWT_TOKEN,
+  JWT_SECRET,
   TOKEN_EXPIRATION_TIME,
 } = require('../config/config.js');
 
@@ -12,7 +12,7 @@ const createToken = (id) => {
   return jwt.encode({
     id,
     expirationDate: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
-  }, JWT_TOKEN);
+  }, JWT_SECRET);
 };
 
 module.exports = {
