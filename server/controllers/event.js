@@ -8,10 +8,10 @@ const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 
-function getEventById(id, key='id') {
+// How can i use this in the methods below?
+const getEventById = (id) => {
   return Event
-    .findOne({
-      where: {[key]: id},
+    .findById(id, {
       attributes: eventAttrs,
       include: [
         {
@@ -24,14 +24,14 @@ function getEventById(id, key='id') {
     .then(event => {
       if(!event) {
         return res.status(404).send({
-          message: 'ERROR: Event not found.',
+          message: 'Entity not found.',
           status: 404
         })
       }
       return res.status(200).send(event)
     })
     .catch(error => res.status(500).send(error));
-}
+};
 
 module.exports = {
   create(req, res) {
