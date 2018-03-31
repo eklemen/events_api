@@ -57,6 +57,8 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {underscored: true});
   User.associate = (models) => {
+    User.hasMany(models.Event);
   };
+  // User.sync({force: true});
   return User;
 };

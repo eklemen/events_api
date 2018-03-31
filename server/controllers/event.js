@@ -10,15 +10,17 @@ const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 module.exports = {
   create(req, res) {
     const {venue, eventDate, title} = req.body;
+    console.log('----------------\n\r', req.tokenBearer);
     return Event
       .create({
         venue,
         eventDate,
         title,
-        creator_id: req.tokenBearer
+        creator_id: req.tokenBearer,
       })
       .then(e => {
-        return Event.findById(e.id, {
+        console.log('e------------\n\r', e.dataValues);
+        return Event.findById(e.dataValues.id, {
           attributes: eventAttrs,
           include: [
             {

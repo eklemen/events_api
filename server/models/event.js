@@ -32,5 +32,6 @@ module.exports = (sequelize, DataTypes) => {
       as: 'creator'
     });
   };
+  // Event.sync({force: true});
   return Event;
 };

@@ -25,13 +25,13 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      // creator_id: {
-      //   type: Sequelize.INTEGER,
-      //   references: {
-      //     model: 'Users',
-      //     key: 'id',
-      //   },
-      // },
+      creator_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Users',
+          key: 'id',
+        },
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE

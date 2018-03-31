@@ -26,8 +26,19 @@ module.exports = {
       const decodedToken = jwt.decode(req.cookies.token, JWT_TOKEN);
       const userId = decodedToken && decodedToken.id;
       if(decodedToken && userId) {
-        req.tokenBearer = userId;
-        next()
+        User.findById(userId)
+          .then(user => {
+            if(!user) {
+              return res.status(403).send({error: 'Token is invalid'})
+            }
+            console.log('user.dataValues.id------------\n\r', user.dataValues.id);
+            req.tokenBearer = user.dataValues.id;
+            next();
+          })
+          .catch(error => {
+            res.status(400).send(error);
+          })
+
       } else {
         return res.status(403).send({
           success: false,
