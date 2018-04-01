@@ -157,13 +157,14 @@ module.exports = {
     return Event
       .findOne({
         where: {uuid: req.params.uuid},
+        attributes: ['id'],
       })
       .then(event => {
         if (!event) return res.status(200).send({success: true});
         return event
-          .update({
-            isDeleted: true,
-          })
+          .update({isDeleted: true},
+            {where: {uuid: req.params.uuid}}
+          )
           .then(() => {
             return res.status(200).send({success: true})
           })
@@ -171,7 +172,7 @@ module.exports = {
       })
       .catch((error) => res.status(500).send({
         error,
-        message: 'ERROR: Internal server error',
+        message: 'Internal server error',
       }));
   }
 };
