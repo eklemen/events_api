@@ -1,19 +1,4 @@
 const User = require('../models').User;
-const jwt = require('jwt-simple');
-const passport = require('passport');
-const { compose } = require('compose-middleware');
-
-const {
-  JWT_SECRET,
-  TOKEN_EXPIRATION_TIME,
-} = require('../config/config.js');
-
-const createToken = (id) => {
-  return jwt.encode({
-    id,
-    expirationDate: new Date(Date.now() + TOKEN_EXPIRATION_TIME),
-  }, JWT_SECRET);
-};
 
 module.exports = {
   list(_req, res) {
@@ -45,7 +30,7 @@ module.exports = {
         ]
       })
       .then(user => {
-        if(!user) return res.status(404).send({error: 'Not found'});
+        if(!user) return res.status(403).send({error: 'Unauthorized'});
         return res.status(200).send(user)
       })
       .catch(error => res.status(500).send(error));
@@ -75,5 +60,4 @@ module.exports = {
       })
       .catch(error => res.status(500).send(error));
   },
-
 };

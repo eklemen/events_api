@@ -2,11 +2,9 @@ const Sequelize = require('sequelize');
 const db = require('../models');
 const Op = Sequelize.Op;
 const Event = require('../models').Event;
-const Client = require('../models').Client;
 const User = require('../models').User;
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
-const clientAttrs = ['uuid', 'firstName', 'lastName', 'company', 'phone'];
 
 // How can i use this in the methods below?
 const getEventById = (id) => {

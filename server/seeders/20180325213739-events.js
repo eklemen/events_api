@@ -8,7 +8,7 @@ module.exports = {
       venue: 'A barn outside',
       event_date: '2018-10-10',
       title: 'Wedding1',
-      client_id: 1,
+      creator_id: 1,
       created_at: new Date(),
       updated_at: new Date()
     },{
@@ -17,7 +17,7 @@ module.exports = {
       venue: '55 W Orlando',
       event_date: '2018-02-12',
       title: 'Corporate Ball',
-      client_id: 2,
+      creator_id: 2,
       created_at: new Date(),
       updated_at: new Date()
     }], {});
