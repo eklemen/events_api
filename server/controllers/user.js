@@ -17,23 +17,24 @@ module.exports = {
       .then(users => res.status(200).send(users))
       .catch(error => res.status(400).send(error));
   },
-  self(req, res) {
-    return User
-      .findById(req.tokenBearer, {
-        attributes: [
-          'uuid',
-          'email',
-          'igUsername',
-          'igFullName',
-          'profilePicture',
-          'businessName',
-        ]
-      })
-      .then(user => {
+  self: async (req, res) => {
+    try {
+      const user = await User
+        .findById(req.tokenBearer, {
+          attributes: [
+            'uuid',
+            'email',
+            'igUsername',
+            'igFullName',
+            'profilePicture',
+            'businessName',
+          ],
+        });
         if(!user) return res.status(403).send({error: 'Unauthorized'});
         return res.status(200).send(user)
-      })
-      .catch(error => res.status(500).send(error));
+    } catch (err) {
+      return res.status(500).send(error)
+    }
   },
   getOne(req, res) {
     return User
