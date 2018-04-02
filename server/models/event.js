@@ -31,6 +31,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'creator_id',
       as: 'creator'
     });
+    Event.belongsToMany(models.User, {
+      through: models.User_Event,
+      as: 'attendees',
+      foreignKey: 'Event_rowId',
+    });
   };
   // Event.sync({force: true});
   return Event;

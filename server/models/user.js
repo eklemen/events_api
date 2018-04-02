@@ -58,6 +58,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {underscored: true});
   User.associate = (models) => {
     User.hasMany(models.Event);
+    User.belongsToMany(models.Event, {
+      through: models.User_Event,
+      as: 'myEvents',
+      foreignKey: 'User_rowId',
+    });
   };
   // User.sync({force: true});
   return User;

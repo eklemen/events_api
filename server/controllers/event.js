@@ -72,7 +72,12 @@ module.exports = {
             model: User,
             as: 'creator',
             attributes: userAttrs
-          }
+          },
+          {
+            model: User,
+            as: 'attendees',
+            attributes: userAttrs,
+          },
         ]
       })
       .then(events => res.status(200).send(events))
@@ -82,7 +87,10 @@ module.exports = {
     return Event
       // should getOne exclude deleted items by default?
       .findOne({
-        where: {uuid: req.params.uuid},
+        where: {
+          uuid: req.params.uuid,
+          isDeleted: false,
+        },
         attributes: eventAttrs,
         include: [
           {
