@@ -1,18 +1,19 @@
 const User = require('../models').User;
+const userAttrs = [
+  'uuid',
+  'email',
+  'phone',
+  'igUsername',
+  'igFullName',
+  'profilePicture',
+  'businessName'];
 
 module.exports = {
   list(_req, res) {
     return User
       .findAll({
         where: {isDeleted: false},
-        attributes: [
-          'uuid',
-          'email',
-          'igUsername',
-          'igFullName',
-          'profilePicture',
-          'businessName',
-        ]
+        attributes: userAttrs
       })
       .then(users => res.status(200).send(users))
       .catch(error => res.status(400).send(error));
@@ -21,14 +22,7 @@ module.exports = {
     try {
       const user = await User
         .findById(req.tokenBearer, {
-          attributes: [
-            'uuid',
-            'email',
-            'igUsername',
-            'igFullName',
-            'profilePicture',
-            'businessName',
-          ],
+          attributes: userAttrs,
         });
         if(!user) return res.status(403).send({error: 'Unauthorized'});
         return res.status(200).send(user)
@@ -41,14 +35,7 @@ module.exports = {
     // should getOne exclude deleted items by default?
       .findOne({
         where: {uuid: req.params.uuid},
-        attributes: [
-          'uuid',
-          'email',
-          'igUsername',
-          'igFullName',
-          'profilePicture',
-          'businessName',
-        ]
+        attributes: userAttrs
       })
       .then(user => {
         if(!user) {

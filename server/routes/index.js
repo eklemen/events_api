@@ -2,6 +2,7 @@ const passport = require('passport');
 const userController = require('../controllers').user;
 const eventsController = require('../controllers').event;
 const authController = require('../controllers').auth;
+const userEventController = require('../controllers').userEvent;
 
 module.exports = (app) => {
 
@@ -21,15 +22,19 @@ module.exports = (app) => {
    * Auth required routes
    * */
   app.use(authController.authRoute);
+
   // Users
   app.get('/api/users', userController.list);
   app.get('/api/users/self', userController.self);
   app.get('/api/users/:uuid', userController.getOne);
 
+  // Event
   app.post('/api/events', eventsController.create);
   app.get('/api/events', eventsController.list);
   app.get('/api/events/:uuid', eventsController.getOne);
   app.put('/api/events/:uuid', eventsController.update);
   app.delete('/api/events/:uuid', eventsController.softDelete);
-  // https://api.instagram.com/oauth/access_token
+
+  // Event Actions
+  app.post('/api/events/:uuid/join', userEventController.joinEvent)
 };

@@ -1,8 +1,7 @@
 const Sequelize = require('sequelize');
 const db = require('../models');
 const Op = Sequelize.Op;
-const Event = require('../models').Event;
-const User = require('../models').User;
+const {Event, User} = require('../models');
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 
@@ -112,10 +111,6 @@ module.exports = {
       .catch(error => res.status(500).send(error));
   },
   update(req, res) {
-    // const {venue, eventDate, title} = req.body;
-    // if('venue' in req.body) updateObj.venue = venue;
-    // if('eventDate' in req.body) updateObj.eventDate = eventDate;
-    // if('title' in req.body) updateObj.title = title;
     return Event
       .update(
         {...req.body},
@@ -129,7 +124,12 @@ module.exports = {
             {
               model: User,
               as: 'creator',
-            }
+            },
+            {
+              model: User,
+              as: 'attendees',
+              attributes: userAttrs,
+            },
           ]
         }
       )
@@ -156,7 +156,9 @@ module.exports = {
           })
           .catch(error => res.status(500).send(error));
       })
-      .catch((error) => res.status(400).send(error));
+      .catch((error) => res.status(400).send({
+        message: 'Event not found'
+      }));
   },
   softDelete(req, res) {
     return Event
