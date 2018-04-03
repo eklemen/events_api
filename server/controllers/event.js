@@ -112,14 +112,13 @@ module.exports = {
       .catch(error => res.status(500).send(error));
   },
   update(req, res) {
-    const {venue, eventDate, title} = req.body;
-    const updateObj = {};
-    if('venue' in req.body) updateObj.venue = venue;
-    if('eventDate' in req.body) updateObj.eventDate = eventDate;
-    if('title' in req.body) updateObj.title = title;
+    // const {venue, eventDate, title} = req.body;
+    // if('venue' in req.body) updateObj.venue = venue;
+    // if('eventDate' in req.body) updateObj.eventDate = eventDate;
+    // if('title' in req.body) updateObj.title = title;
     return Event
       .update(
-        updateObj,
+        {...req.body},
         {
           where: {
             uuid: req.params.uuid

@@ -4,8 +4,8 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
 
-require('./server/initializers/passport');
-require('./server/config/config.js');
+require('./initializers/passport');
+require('./config/config.js');
 
 // Set up the express app
 const app = express();
@@ -20,7 +20,7 @@ app.use(passport.initialize());
 app.use(cookieParser());
 
 // Require our routes into the application.
-require('./server/routes')(app);
+require('./routes/index')(app);
 
 // TODO: add error handling middleware
 // if (app.get('env') === 'development') {
