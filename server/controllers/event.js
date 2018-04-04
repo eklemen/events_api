@@ -76,6 +76,10 @@ module.exports = {
             model: User,
             as: 'attendees',
             attributes: userAttrs,
+            through: {
+              attributes: ['userRole', 'userPermission'],
+              as: 'memberDetails'
+            }
           },
         ]
       })

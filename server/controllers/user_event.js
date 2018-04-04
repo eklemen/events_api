@@ -40,6 +40,7 @@ module.exports = {
           EventRowId: dataValues.id,
         },
       });
+      console.log('userEvent.dataValues------------\n\r', userEvent.dataValues);
       if(!userEvent) {
         await UserEvent.create({
           UserRowId: userId,
@@ -58,6 +59,10 @@ module.exports = {
               model: User,
               as: 'attendees',
               attributes: userAttrs,
+              through: {
+                attributes: ['userRole', 'userPermission'],
+                as: 'memberDetails'
+              }
             },
           ]
         });
