@@ -10,54 +10,93 @@ const userAttrs = [
   'businessName'];
 
 module.exports = {
-  // joinEvent: async (req, res) => {
-  //   try {
-  //     const {params:{uuid}, tokenBearer: userId} = req;
-  //     const event = await Event.findOne({
-  //       where: {uuid},
-  //       attributes: [...eventAttrs, 'id']
-  //     });
-  //     const u = await event.getAttendee({attributes: ['id']});
-  //     event.getAttendee().then(a => {
-  //       console.log('a================\n\r', a);
-  //     })
-  //       .catch(e => {console.log(e);})
-  //     console.log('event------------\n\r', u);
-  //     return res.status(200).send(event)
-  //   } catch (err) {
-  //     return res.status(500).send(err);
-  //   }
-  // },
-  joinEvent(req, res) {
-    const {params:{uuid}, tokenBearer: userId} = req;
-    Event.findOne({
-      where: {uuid},
-      attributes: [...eventAttrs, 'id'],
-      include: [
-        {
-          model: User,
-          as: 'creator',
-        },
-        {
-          model: UserEvent,
-          as: 'attendees',
-          attributes: userAttrs
-        }
-      ]
-    })
-      .then(event => {
-        event.getAttendee().then(a => {
-          console.log('a================\n\r', a);
-          return res.status(200).send(event)
-        })
-          .catch(e => {
-            console.log(e);
-            return res.status(400).send(e)
-          });
-        console.log('event------------\n\r', u);
-    })
-      .catch(e => res.status(500).send(e));
+  joinEvent: async (req, res) => {
+    try {
+      const {
+        params:{uuid},
+        tokenBearer: userId,
+        body: {userRole, userPermission},
+      } = req;
+      const permissions = {
+        userRole,
+        userPermission,
+      };
 
+      const event = await Event.findOne({
+        where: {uuid},
+        attributes: [...eventAttrs, 'id'],
+      });
+
+      const {dataValues} = event;
+      if(!dataValues || !dataValues.id) {
+        return res.status(400).send({
+          message: 'Event does not exist'
+        });
+      }
+
+      const userEvent = await UserEvent.findOne({
+        where: {
+          UserRowId: userId,
+          EventRowId: dataValues.id,
+        },
+      });
+      if(!userEvent) {
+        await UserEvent.create({
+          UserRowId: userId,
+          Event_rowId: dataValues.id,
+          ...permissions,
+        });
+        const newEvent = await Event.findById(dataValues.id, {
+          attributes: eventAttrs,
+          include: [
+            {
+              model: User,
+              as: 'creator',
+              attributes: userAttrs
+            },
+            {
+              model: User,
+              as: 'attendees',
+              attributes: userAttrs,
+            },
+          ]
+        });
+        return res.status(200).send({...newEvent.dataValues, newMember: true});
+      }
+      // else {
+      //   const updatedJoin = await UserEvent.update({
+      //     ...permissions
+      //   },{
+      //     where: {
+      //       id: userEvent.dataValues.id
+      //     },
+      //     returning: true,
+      //   });
+      //   if(updatedJoin) {
+      //     const updatedEvent = await Event.findById(dataValues.id, {
+      //       attributes: eventAttrs,
+      //       include: [
+      //         {
+      //           model: User,
+      //           as: 'creator',
+      //           attributes: userAttrs
+      //         },
+      //         {
+      //           model: User,
+      //           as: 'attendees',
+      //           attributes: userAttrs,
+      //         },
+      //       ]
+      //     });
+      //     return res.status(200).send({...updatedEvent, newMember: false});
+      //   }
+      //   console.log('updatedJoin------------\n\r', updatedJoin);
+      // }
+      console.log('userEvent------------\n\r', userEvent);
+      return res.status(200).send(userEvent.dataValues);
+    } catch (err) {
+      return res.status(500).send(err);
+    }
   },
   create(req, res) {
     const {venue, eventDate, title} = req.body;
