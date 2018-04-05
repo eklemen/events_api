@@ -74,7 +74,7 @@ module.exports = {
           },
           {
             model: User,
-            as: 'attendees',
+            as: 'members',
             attributes: userAttrs,
             through: {
               attributes: ['userRole', 'userPermission'],
@@ -131,7 +131,7 @@ module.exports = {
             },
             {
               model: User,
-              as: 'attendees',
+              as: 'members',
               attributes: userAttrs,
             },
           ]

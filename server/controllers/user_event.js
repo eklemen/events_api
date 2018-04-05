@@ -21,29 +21,30 @@ module.exports = {
         userRole,
         userPermission,
       };
-
+      // Get the `id` of the Event
       const event = await Event.findOne({
         where: {uuid},
         attributes: [...eventAttrs, 'id'],
       });
-
       const {dataValues} = event;
+
       if(!dataValues || !dataValues.id) {
         return res.status(400).send({
           message: 'Event does not exist'
         });
       }
-
+      // Check the join table for that UserEvent relation
       const userEvent = await UserEvent.findOne({
         where: {
           UserRowId: userId,
           EventRowId: dataValues.id,
         },
       });
-      console.log('userEvent.dataValues------------\n\r', userEvent.dataValues);
+
+      // User is not a member, create the record
       if(!userEvent) {
         await UserEvent.create({
-          UserRowId: userId,
+          User_rowId: userId,
           Event_rowId: dataValues.id,
           ...permissions,
         });
@@ -57,7 +58,7 @@ module.exports = {
             },
             {
               model: User,
-              as: 'attendees',
+              as: 'members',
               attributes: userAttrs,
               through: {
                 attributes: ['userRole', 'userPermission'],
@@ -68,37 +69,37 @@ module.exports = {
         });
         return res.status(200).send({...newEvent.dataValues, newMember: true});
       }
-      // else {
-      //   const updatedJoin = await UserEvent.update({
-      //     ...permissions
-      //   },{
-      //     where: {
-      //       id: userEvent.dataValues.id
-      //     },
-      //     returning: true,
-      //   });
-      //   if(updatedJoin) {
-      //     const updatedEvent = await Event.findById(dataValues.id, {
-      //       attributes: eventAttrs,
-      //       include: [
-      //         {
-      //           model: User,
-      //           as: 'creator',
-      //           attributes: userAttrs
-      //         },
-      //         {
-      //           model: User,
-      //           as: 'attendees',
-      //           attributes: userAttrs,
-      //         },
-      //       ]
-      //     });
-      //     return res.status(200).send({...updatedEvent, newMember: false});
-      //   }
-      //   console.log('updatedJoin------------\n\r', updatedJoin);
-      // }
-      console.log('userEvent------------\n\r', userEvent);
-      return res.status(200).send(userEvent.dataValues);
+      // Update user if found
+      const updatedJoin = await UserEvent.update({
+        ...permissions
+      },{
+        where: {
+          id: userEvent.dataValues.id
+        },
+        returning: true,
+      });
+      if(updatedJoin) {
+        const updatedEvent = await Event.findById(dataValues.id, {
+          attributes: eventAttrs,
+          include: [
+            {
+              model: User,
+              as: 'creator',
+              attributes: userAttrs
+            },
+            {
+              model: User,
+              as: 'members',
+              attributes: userAttrs,
+              through: {
+                attributes: ['userRole', 'userPermission'],
+                as: 'memberDetails'
+              }
+            },
+          ]
+        });
+        return res.status(200).send({...updatedEvent, newMember: false});
+      }
     } catch (err) {
       return res.status(500).send(err);
     }
