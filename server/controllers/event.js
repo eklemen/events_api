@@ -1,29 +1,7 @@
 const Sequelize = require('sequelize');
-const db = require('../models');
 const Op = Sequelize.Op;
-const {Event, User, EventUser} = require('../models');
-const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
-const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
-
-// How can i use this in the methods below?
-const inclCreator = {
-  model: User,
-  as: 'creator',
-  attributes: userAttrs
-};
-const inclMembers = {
-  model: User,
-  as: 'members',
-  attributes: userAttrs,
-  through: {
-    attributes: ['userRole', 'userPermission'],
-    as: 'memberDetails'
-  }
-};
-const includeAll = [
-  inclCreator,
-  inclMembers,
-];
+const {Event, EventUser} = require('../models');
+const include = require('./constants');
 
 module.exports = {
   create: async (req, res) => {
@@ -47,8 +25,8 @@ module.exports = {
         userRole: userRole.toLowerCase(),
       });
       const event = await Event.findById(eventId, {
-        attributes: eventAttrs,
-        include: includeAll
+        attributes: include.eventAttrs,
+        include: include.all
       });
       if(!event) return res.status(500).send({message: 'Internal server error'});
       return res.status(200).send(event)
@@ -65,8 +43,8 @@ module.exports = {
         where: {
           isDeleted: false
         },
-        attributes: eventAttrs,
-        include: includeAll
+        attributes: include.eventAttrs,
+        include: include.all
       })
       .then(events => res.status(200).send(events))
       .catch(error => res.status(400).send(error));
@@ -79,8 +57,8 @@ module.exports = {
           uuid: req.params.uuid,
           isDeleted: false,
         },
-        attributes: eventAttrs,
-        include: includeAll
+        attributes: include.eventAttrs,
+        include: include.all
       })
       .then(event => {
         if(!event) {
@@ -103,14 +81,14 @@ module.exports = {
           },
           returning: true,
           plain: true,
-          include: includeAll
+          include: include.all
         }
       )
       .spread((_rows, event) => {
         return Event
           .findById(event.dataValues.id, {
-            attributes: eventAttrs,
-            include: includeAll
+            attributes: include.eventAttrs,
+            include: include.all
           })
           .then(e => {
             if(!e) {

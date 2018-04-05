@@ -1,12 +1,5 @@
 const User = require('../models').User;
-const userAttrs = [
-  'uuid',
-  'email',
-  'phone',
-  'igUsername',
-  'igFullName',
-  'profilePicture',
-  'businessName'];
+const { userAttrs } = require('./constants');
 
 module.exports = {
   list(_req, res) {

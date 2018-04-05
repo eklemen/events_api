@@ -35,6 +35,7 @@ module.exports = (app) => {
   app.put('/api/events/:uuid', eventsController.update);
   app.delete('/api/events/:uuid', eventsController.softDelete);
 
-  // Event Actions
+  // EventUser Actions
   app.post('/api/events/:uuid/join', EventUserController.joinEvent)
+  app.post('/api/events/:uuid/leave', EventUserController.leaveEvent)
 };

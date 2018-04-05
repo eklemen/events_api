@@ -1,13 +1,5 @@
-const {EventUser, Event, User} = require('../models');
-const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
-const userAttrs = [
-  'uuid',
-  'email',
-  'phone',
-  'igUsername',
-  'igFullName',
-  'profilePicture',
-  'businessName'];
+const {EventUser, Event} = require('../models');
+const include = require('./constants');
 
 module.exports = {
   joinEvent: async (req, res) => {
@@ -24,7 +16,7 @@ module.exports = {
       // Get the `id` of the Event
       const event = await Event.findOne({
         where: {uuid},
-        attributes: [...eventAttrs, 'id'],
+        attributes: [...include.eventAttrs, 'id'],
       });
       const {dataValues} = event;
 
@@ -49,23 +41,8 @@ module.exports = {
           ...permissions,
         });
         const newEvent = await Event.findById(dataValues.id, {
-          attributes: eventAttrs,
-          include: [
-            {
-              model: User,
-              as: 'creator',
-              attributes: userAttrs
-            },
-            {
-              model: User,
-              as: 'members',
-              attributes: userAttrs,
-              through: {
-                attributes: ['userRole', 'userPermission'],
-                as: 'memberDetails'
-              }
-            },
-          ]
+          attributes: include.eventAttrs,
+          include: include.all
         });
         return res.status(200).send({...newEvent.dataValues, newMember: true});
       }
@@ -80,23 +57,8 @@ module.exports = {
       });
       if(updatedJoin) {
         const updatedEvent = await Event.findById(dataValues.id, {
-          attributes: eventAttrs,
-          include: [
-            {
-              model: User,
-              as: 'creator',
-              attributes: userAttrs
-            },
-            {
-              model: User,
-              as: 'members',
-              attributes: userAttrs,
-              through: {
-                attributes: ['userRole', 'userPermission'],
-                as: 'memberDetails'
-              }
-            },
-          ]
+          attributes: include.eventAttrs,
+          include: include.all
         });
         return res.status(200).send({...updatedEvent, newMember: false});
       }
@@ -104,32 +66,12 @@ module.exports = {
       return res.status(500).send(err);
     }
   },
-  create(req, res) {
-    const {venue, eventDate, title} = req.body;
-    return Event
-      .create({
-        venue,
-        eventDate,
-        title,
-        creator_id: req.tokenBearer,
-      })
-      .then(e => {
-        return Event.findById(e.dataValues.id, {
-          attributes: eventAttrs,
-          include: [
-            {
-              model: User,
-              as: 'creator',
-              attributes: userAttrs
-            }
-          ]
-        })
-          .then(event => res.status(200).send(event))
-          .catch(error => res.status(404).send(error));
-      })
-      .catch(error => res.status(500).send({
-        error,
-        message: 'Unable to create Event.',
-      }));
+  leaveEvent: async (req, res) => {
+    const {tokenBearer: userId, params: {uuid}} = req;
+    await EventUser.destroy({
+      where: {
+
+      }
+    });
   },
 };
