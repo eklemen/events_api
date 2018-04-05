@@ -59,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = (models) => {
     User.hasMany(models.Event);
     User.belongsToMany(models.Event, {
-      through: models.UserEvent,
+      through: models.EventUser,
       as: 'myEvents',
       foreignKey: 'User_rowId',
     });

@@ -1,63 +1,63 @@
 const Sequelize = require('sequelize');
 const db = require('../models');
 const Op = Sequelize.Op;
-const {Event, User} = require('../models');
+const {Event, User, EventUser} = require('../models');
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 
 // How can i use this in the methods below?
-const getEventById = (id) => {
-  return Event
-    .findById(id, {
-      attributes: eventAttrs,
-      include: [
-        {
-          model: User,
-          as: 'creator',
-          attributes: userAttrs
-        }
-      ]
-    })
-    .then(event => {
-      if(!event) {
-        return res.status(404).send({
-          message: 'Entity not found.',
-          status: 404
-        })
-      }
-      return res.status(200).send(event)
-    })
-    .catch(error => res.status(500).send(error));
+const inclCreator = {
+  model: User,
+  as: 'creator',
+  attributes: userAttrs
 };
+const inclMembers = {
+  model: User,
+  as: 'members',
+  attributes: userAttrs,
+  through: {
+    attributes: ['userRole', 'userPermission'],
+    as: 'memberDetails'
+  }
+};
+const includeAll = [
+  inclCreator,
+  inclMembers,
+];
 
 module.exports = {
-  create(req, res) {
-    const {venue, eventDate, title} = req.body;
-    return Event
-      .create({
-        venue,
-        eventDate,
-        title,
-        creator_id: req.tokenBearer,
-      })
-      .then(e => {
-        return Event.findById(e.dataValues.id, {
-          attributes: eventAttrs,
-          include: [
-            {
-              model: User,
-              as: 'creator',
-              attributes: userAttrs
-            }
-          ]
-        })
-          .then(event => res.status(200).send(event))
-          .catch(error => res.status(404).send(error));
-      })
-      .catch(error => res.status(500).send({
-        error,
+  create: async (req, res) => {
+    const {
+      body:{venue, eventDate, title, userRole='vendor'},
+      tokenBearer: userId
+    } = req;
+    try {
+      const {dataValues: {id: eventId}} = await Event
+        .create({
+          venue,
+          eventDate,
+          title,
+          creator_id: userId,
+        });
+      // Add user to the list of members
+      await EventUser.create({
+        User_rowId: userId,
+        Event_rowId: eventId,
+        userPermission: 'edit',
+        userRole: userRole.toLowerCase(),
+      });
+      const event = await Event.findById(eventId, {
+        attributes: eventAttrs,
+        include: includeAll
+      });
+      if(!event) return res.status(500).send({message: 'Internal server error'});
+      return res.status(200).send(event)
+    } catch (err) {
+      return res.status(500).send({
+        err,
         message: 'Unable to create Event.',
-      }));
+      })
+    }
   },
   list(_req, res) {
     return Event
@@ -66,22 +66,7 @@ module.exports = {
           isDeleted: false
         },
         attributes: eventAttrs,
-        include: [
-          {
-            model: User,
-            as: 'creator',
-            attributes: userAttrs
-          },
-          {
-            model: User,
-            as: 'members',
-            attributes: userAttrs,
-            through: {
-              attributes: ['userRole', 'userPermission'],
-              as: 'memberDetails'
-            }
-          },
-        ]
+        include: includeAll
       })
       .then(events => res.status(200).send(events))
       .catch(error => res.status(400).send(error));
@@ -95,13 +80,7 @@ module.exports = {
           isDeleted: false,
         },
         attributes: eventAttrs,
-        include: [
-          {
-            model: User,
-            as: 'creator',
-            attributes: userAttrs
-          }
-        ]
+        include: includeAll
       })
       .then(event => {
         if(!event) {
@@ -124,30 +103,14 @@ module.exports = {
           },
           returning: true,
           plain: true,
-          include: [
-            {
-              model: User,
-              as: 'creator',
-            },
-            {
-              model: User,
-              as: 'members',
-              attributes: userAttrs,
-            },
-          ]
+          include: includeAll
         }
       )
       .spread((_rows, event) => {
         return Event
           .findById(event.dataValues.id, {
             attributes: eventAttrs,
-            include: [
-              {
-                model: User,
-                as: 'creator',
-                attributes: userAttrs
-              }
-            ]
+            include: includeAll
           })
           .then(e => {
             if(!e) {

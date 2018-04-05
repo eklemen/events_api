@@ -1,4 +1,4 @@
-const {UserEvent, Event, User} = require('../models');
+const {EventUser, Event, User} = require('../models');
 const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
 const userAttrs = [
   'uuid',
@@ -33,8 +33,8 @@ module.exports = {
           message: 'Event does not exist'
         });
       }
-      // Check the join table for that UserEvent relation
-      const userEvent = await UserEvent.findOne({
+      // Check the join table for that EventUser relation
+      const eventUser = await EventUser.findOne({
         where: {
           UserRowId: userId,
           EventRowId: dataValues.id,
@@ -42,8 +42,8 @@ module.exports = {
       });
 
       // User is not a member, create the record
-      if(!userEvent) {
-        await UserEvent.create({
+      if(!eventUser) {
+        await EventUser.create({
           User_rowId: userId,
           Event_rowId: dataValues.id,
           ...permissions,
@@ -70,11 +70,11 @@ module.exports = {
         return res.status(200).send({...newEvent.dataValues, newMember: true});
       }
       // Update user if found
-      const updatedJoin = await UserEvent.update({
+      const updatedJoin = await EventUser.update({
         ...permissions
       },{
         where: {
-          id: userEvent.dataValues.id
+          id: eventUser.dataValues.id
         },
         returning: true,
       });

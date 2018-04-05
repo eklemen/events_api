@@ -2,7 +2,7 @@ const passport = require('passport');
 const userController = require('../controllers').user;
 const eventsController = require('../controllers').event;
 const authController = require('../controllers').auth;
-const userEventController = require('../controllers').userEvent;
+const EventUserController = require('../controllers').EventUser;
 
 module.exports = (app) => {
 
@@ -36,5 +36,5 @@ module.exports = (app) => {
   app.delete('/api/events/:uuid', eventsController.softDelete);
 
   // Event Actions
-  app.post('/api/events/:uuid/join', userEventController.joinEvent)
+  app.post('/api/events/:uuid/join', EventUserController.joinEvent)
 };

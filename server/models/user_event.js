@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const UserEvent = sequelize.define('UserEvent', {
+  const EventUser = sequelize.define('EventUser', {
     UserRowId: {
       type: DataTypes.INTEGER,
       field: 'User_rowId',
@@ -18,9 +18,9 @@ module.exports = (sequelize, DataTypes) => {
       field: 'user_permission',
     },
   }, {underscored: true});
-  UserEvent.associate = function(models) {
+  EventUser.associate = function(models) {
     // associations can be defined here
   };
-  // UserEvent.sync({force: true});
-  return UserEvent;
+  // EventUser.sync({force: true});
+  return EventUser;
 };

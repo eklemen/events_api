@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'creator'
     });
     Event.belongsToMany(models.User, {
-      through: models.UserEvent,
+      through: models.EventUser,
       name: 'EventRowId',
       as: {singular: 'member', plural: 'members'},
       foreignKey: 'Event_rowId',
