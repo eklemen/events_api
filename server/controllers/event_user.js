@@ -68,10 +68,21 @@ module.exports = {
   },
   leaveEvent: async (req, res) => {
     const {tokenBearer: userId, params: {uuid}} = req;
-    await EventUser.destroy({
-      where: {
-
-      }
-    });
+    try {
+      const {dataValues:{id}} = await Event.findOne({
+        where: {uuid},
+        attributes: include.eventAttrs
+      });
+      console.log('id------------\n\r', id);
+      await EventUser.destroy({
+        where: {
+          User_rowId: userId,
+          EventRowId: id,
+        }
+      });
+      return res.status(200).send({success: true});
+    } catch (err) {
+      return res.status(500).send(err);
+    }
   },
 };
