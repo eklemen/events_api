@@ -1,5 +1,7 @@
-const {EventUser, Event} = require('../models');
+const {EventUser, Event, User} = require('../models');
 const include = require('./constants');
+const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
+const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 
 module.exports = {
   joinEvent: async (req, res) => {
@@ -31,6 +33,7 @@ module.exports = {
           UserRowId: userId,
           EventRowId: dataValues.id,
         },
+        attributes: ['id']
       });
 
       // User is not a member, create the record
@@ -47,7 +50,9 @@ module.exports = {
         return res.status(200).send({...newEvent.dataValues, newMember: true});
       }
       // Update user if found
-      const updatedJoin = await EventUser.update({
+      const [
+        _rows,
+        [{dataValues: updatedValues}]] = await EventUser.update({
         ...permissions
       },{
         where: {
@@ -55,8 +60,10 @@ module.exports = {
         },
         returning: true,
       });
-      if(updatedJoin) {
-        const updatedEvent = await Event.findById(dataValues.id, {
+      if(updatedValues) {
+        const {
+          dataValues: updatedEvent
+        } = await Event.findById(updatedValues.id, {
           attributes: include.eventAttrs,
           include: include.all
         });
