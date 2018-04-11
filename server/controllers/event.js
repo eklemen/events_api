@@ -60,6 +60,10 @@ module.exports = {
         include: [
           {
             model: User,
+            as: 'creator',
+          },
+          {
+            model: User,
             as: 'members',
             through: {
               attributes: ['userRole', 'userPermission'],
