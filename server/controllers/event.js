@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
-const {Event, EventUser} = require('../models');
+const {Event, EventUser, User} = require('../models');
 const include = require('./constants');
 
 module.exports = {
@@ -55,10 +55,20 @@ module.exports = {
       .findOne({
         where: {
           uuid: req.params.uuid,
-          isDeleted: false,
+          // isDeleted: false,
         },
-        attributes: include.eventAttrs,
-        include: include.all
+        include: [
+          {
+            model: User,
+            as: 'members',
+            through: {
+              attributes: ['userRole', 'userPermission'],
+              as: 'memberDetails'
+            }
+          },
+        ]
+        // attributes: include.eventAttrs,
+        // include: include.all
       })
       .then(event => {
         if(!event) {

@@ -28,7 +28,7 @@ module.exports = {
     // should getOne exclude deleted items by default?
       .findOne({
         where: {uuid: req.params.uuid},
-        attributes: userAttrs
+        // attributes: userAttrs
       })
       .then(user => {
         if(!user) {

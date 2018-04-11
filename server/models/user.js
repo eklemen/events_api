@@ -57,7 +57,10 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {underscored: true});
   User.associate = (models) => {
-    User.hasMany(models.Event);
+    User.hasMany(models.Event, {
+      foreignKey: 'creator_id',
+      as: 'ownedEvents'
+    });
     User.belongsToMany(models.Event, {
       through: models.EventUser,
       as: 'myEvents',
