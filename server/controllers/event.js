@@ -55,23 +55,23 @@ module.exports = {
       .findOne({
         where: {
           uuid: req.params.uuid,
-          // isDeleted: false,
         },
+        attributes: ['uuid', 'venue', 'eventDate', 'title'],
         include: [
           {
             model: User,
             as: 'creator',
+            attributes: ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName']
           },
-          {
-            model: User,
-            as: 'members',
-            through: {
-              attributes: ['userRole', 'userPermission'],
-              as: 'memberDetails'
-            }
-          },
-        ]
-        // attributes: include.eventAttrs,
+          // {
+          //   model: User,
+          //   as: 'members',
+          //   through: {
+          //     attributes: ['userRole', 'userPermission'],
+          //     as: 'memberDetails'
+          //   }
+          // },
+        ],
         // include: include.all
       })
       .then(event => {

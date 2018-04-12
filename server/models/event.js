@@ -1,4 +1,5 @@
 'use strict';
+const {User} = require('./');
 module.exports = (sequelize, DataTypes) => {
   const Event = sequelize.define('Event', {
     uuid: {
@@ -25,10 +26,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-  }, {underscored: true});
+  }, {
+    underscored: true,
+    // defaultScope: {
+    //   where: {
+    //     isDeleted: false,
+    //   },
+    //   // include: [
+    //   //   {model: User, as: 'creator'}
+    //   // ]
+    // },
+  });
   Event.associate = models => {
     Event.belongsTo(models.User, {
-      foreignKey: 'creator_id',
+      // foreignKey: 'creator_id',
       as: 'creator'
     });
     Event.belongsToMany(models.User, {
