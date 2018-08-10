@@ -1,5 +1,5 @@
 const {User} = require('../models');
-const eventAttrs = ['uuid', 'venue', 'eventDate', 'title'];
+const eventAttrs = ['uuid', 'venue', 'eventDate', 'title', 'creator_id'];
 const userAttrs = ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName'];
 
 const includeBlocks = {

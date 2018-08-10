@@ -49,96 +49,60 @@ module.exports = {
       .then(events => res.status(200).send(events))
       .catch(error => res.status(400).send(error));
   },
-  getOne(req, res) {
-    return Event
-      // should getOne exclude deleted items by default?
-      .findOne({
-        where: {
-          uuid: req.params.uuid,
-        },
-        attributes: ['uuid', 'venue', 'eventDate', 'title'],
-        include: [
-          {
-            model: User,
-            as: 'creator',
-            attributes: ['uuid', 'email', 'phone', 'igUsername', 'igFullName', 'profilePicture', 'businessName']
-          },
-          // {
-          //   model: User,
-          //   as: 'members',
-          //   through: {
-          //     attributes: ['userRole', 'userPermission'],
-          //     as: 'memberDetails'
-          //   }
-          // },
-        ],
-        // include: include.all
-      })
-      .then(event => {
-        if(!event) {
-          return res.status(404).send({
-            message: 'ERROR: Event with this uuid does not exist.',
-            status: 404
-          })
-        }
-        return res.status(200).send(event)
-      })
-      .catch(error => res.status(500).send(error));
-  },
-  update(req, res) {
-    return Event
-      .update(
-        {...req.body},
-        {
-          where: {
-            uuid: req.params.uuid
-          },
-          returning: true,
-          plain: true,
+  getOne: async(req, res) => {
+    try {
+      const event = await Event
+        .findOne({
+          where: {uuid: req.params.uuid},
           include: include.all
-        }
-      )
-      .spread((_rows, event) => {
-        return Event
-          .findById(event.dataValues.id, {
-            attributes: include.eventAttrs,
-            include: include.all
-          })
-          .then(e => {
-            if(!e) {
-              return res.status(404).send({
-                message: 'ERROR: Event not found.',
-                status: 404
-              })
-            }
-            return res.status(200).send(e)
-          })
-          .catch(error => res.status(500).send(error));
-      })
-      .catch((error) => res.status(400).send({
-        message: 'Event not found'
-      }));
+        });
+      if (!event) {
+        return res.status(404).send({
+          message: 'ERROR: Event with this uuid does not exist.',
+          status: 404
+        })
+      }
+      return res.status(200).send(event)
+    } catch (err) {
+      return res.status(500).send(err)
+    }
   },
-  softDelete(req, res) {
-    return Event
-      .findOne({
-        where: {uuid: req.params.uuid},
-        attributes: ['id'],
-      })
-      .then(event => {
-        if (!event) return res.status(200).send({success: true});
-        return event
-          .update({isDeleted: true},
-            {where: {uuid: req.params.uuid}}
-          )
-          .then(() => {
-            return res.status(200).send({success: true})
-          })
-          .catch((error) => res.status(500).send(error));
-      })
-      .catch((error) => res.status(500).send({
-        error,
+  update: async (req, res) => {
+    try {
+      const [_, {dataValues}] = await Event
+        .update(
+          {...req.body},
+          {where: {uuid: req.params.uuid},
+            returning: true,
+            plain: true,
+            include: include.all
+          });
+      const updatedEvent = await Event
+        .findById(dataValues.id, {
+          include: include.all
+        });
+      return res.status(200).send(updatedEvent);
+    } catch (err) {
+      return res.status(400).send({
+        message: 'Event not found'
+      });
+    }
+  },
+  softDelete: async (req, res) => {
+    try {
+      // const event = await Event
+      //   .findOne({
+      //     where: {uuid: req.params.uuid},
+      //   });
+      // const response = res.status(200).send({success: true});
+      // if (!event) return res.status(400).send({success: true});
+      await Event.update({where: {uuid: req.params.uuid},}, {isDeleted: true});
+      return res.status(200).send({success: true});
+    } catch (err) {
+      return res.status(500).send({
+        error: err,
         message: 'Internal server error',
-      }));
+      })
+    }
   }
 };

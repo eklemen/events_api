@@ -28,14 +28,15 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     underscored: true,
-    // defaultScope: {
-    //   where: {
-    //     isDeleted: false,
-    //   },
-    //   // include: [
-    //   //   {model: User, as: 'creator'}
-    //   // ]
-    // },
+    defaultScope: {
+      where: {
+        isDeleted: false,
+      },
+      attributes: ['uuid', 'venue', 'eventDate', 'title', 'creator_id']
+      // include: [
+      //   {model: User, as: 'creator'}
+      // ]
+    },
   });
   Event.associate = models => {
     Event.belongsTo(models.User, {
